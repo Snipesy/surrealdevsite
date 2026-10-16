@@ -7,6 +7,7 @@ export const SITE = {
     'Snipesy’s blog: reverse engineering cars and phones, automotive security research, and the occasional Gretio update.',
   author: 'Snipesy',
   company: 'Surreal Development LLC',
+  source: 'https://github.com/Snipesy/surrealdevsite',
   postsPerPage: 10,
 };
 

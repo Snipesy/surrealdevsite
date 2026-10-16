@@ -408,6 +408,8 @@ img, video, iframe { max-width: 100%; }
 .footer-links { display: flex; flex-wrap: wrap; gap: 1rem; }
 .footer-links a { color: var(--dim); text-decoration: none; }
 .footer-links a:hover { color: var(--text-strong); }
+.footer-right .footer-links { justify-content: flex-end; }
+@media (max-width: 560px) { .footer-right .footer-links { justify-content: flex-start; } }
 
 /* Code: no ligatures (-> must stay ->) */
 .prose pre, .prose code { font-variant-ligatures: none; font-feature-settings: 'liga' 0, 'calt' 0; }

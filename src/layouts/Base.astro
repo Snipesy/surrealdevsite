@@ -102,9 +102,12 @@ const year = new Date().getUTCFullYear();
             <a href="/privacy-policy/">Privacy</a>
           </p>
         </div>
-        <p class="footer-links mono">
-          {SOCIAL.map((s) => <a href={s.href} rel="me noopener">{s.label}</a>)}
-        </p>
+        <div class="footer-right">
+          <p class="footer-links mono">
+            {SOCIAL.map((s) => <a href={s.href} rel="me noopener">{s.label}</a>)}
+          </p>
+          <p class="footer-links mono"><a href={SITE.source}>Source code of this website</a></p>
+        </div>
       </div>
     </footer>
 
