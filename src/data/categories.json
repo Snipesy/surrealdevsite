@@ -1,0 +1,17 @@
+[
+  {
+    "slug": "automotive-ramblings",
+    "name": "Automotive Ramblings",
+    "path": "automotive-ramblings"
+  },
+  {
+    "slug": "gretio",
+    "name": "Gretio",
+    "path": "software/gretio"
+  },
+  {
+    "slug": "malware",
+    "name": "Malware",
+    "path": "malware"
+  }
+]

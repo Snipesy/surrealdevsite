@@ -1,0 +1,131 @@
+---
+// Posts and pages both live at /<slug>/, matching the WordPress permalinks.
+import { getCollection, render } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import PostList from '../components/PostList.astro';
+import Form from '../components/Form.astro';
+import { SITE } from '../site';
+import { getPosts, postUrl, formatDate, categoryBySlug, categoryUrl, readingMinutes, excerptOf, type Post } from '../lib/posts';
+
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  const pages = await getCollection('pages');
+  return [
+    ...posts.map((entry, i) => ({
+      params: { slug: entry.id },
+      props: { kind: 'post' as const, entry, newer: posts[i - 1], older: posts[i + 1] },
+    })),
+    ...pages.map((entry) => ({ params: { slug: entry.id }, props: { kind: 'page' as const, entry } })),
+  ];
+}
+
+const { kind, entry, newer, older } = Astro.props as any;
+const { Content } = await render(entry);
+const post = kind === 'post' ? (entry as Post) : undefined;
+// Skip the cover when the body already shows it. Paths may be percent-encoded on one side
+// (e.g. a macOS screenshot's U+202F as %E2%80%AF), so compare decoded.
+const decode = (s: string) => { try { return decodeURI(s); } catch { return s; } };
+const showCover = !!entry.data.cover && !decode(entry.body ?? '').includes(decode(entry.data.cover));
+const cats = post?.data.categories ?? [];
+
+// A page can list its related posts by having the same slug as a category (e.g. /gretio/).
+const related = kind === 'page' ? (await getPosts()).filter((p) => p.data.categories.includes(entry.id)).slice(0, 5) : [];
+---
+
+<Base
+  title={entry.data.title}
+  description={post ? excerptOf(post, 180) : entry.data.excerpt}
+  image={entry.data.cover}
+  type={post ? 'article' : 'website'}
+  published={post?.data.date}
+  modified={post?.data.updated}
+  jsonLd={post && {
+    '@type': 'BlogPosting',
+    headline: post.data.title,
+    description: excerptOf(post, 300),
+    datePublished: post.data.date.toISOString(),
+    dateModified: (post.data.updated ?? post.data.date).toISOString(),
+    url: new URL(postUrl(post), Astro.site).href,
+    mainEntityOfPage: new URL(postUrl(post), Astro.site).href,
+    image: new URL(post.data.cover ?? '/og.png', Astro.site).href,
+    author: { '@type': 'Person', name: SITE.author, url: new URL('/about/', Astro.site).href },
+    publisher: { '@type': 'Organization', name: SITE.company, logo: { '@type': 'ImageObject', url: new URL('/og.png', Astro.site).href } },
+    keywords: cats.map((c: string) => categoryBySlug(c).name).join(', ') || undefined,
+  }}
+>
+  <article class="wrap article" data-pagefind-body>
+    <header class="article-head">
+      {post && (
+        <p class="kicker mono">
+          <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time>
+          <span class="dot">·</span>
+          <span>{readingMinutes(post)} min read</span>
+          {cats.map((c: string) => (<><span class="dot">·</span><a href={categoryUrl(c)}>{categoryBySlug(c).name}</a></>))}
+        </p>
+      )}
+      <h1>{entry.data.title}</h1>
+    </header>
+    {showCover && <img class="cover" src={entry.data.cover} alt={post?.data.coverAlt ?? ''} />}
+    <div class="prose">
+      <Content />
+      {kind === 'page' && entry.data.form && <Form id={entry.id} form={entry.data.form} />}
+    </div>
+    {post?.data.updated && post.data.updated.valueOf() - post.data.date.valueOf() > 864e5 && (
+      <p class="updated mono dim">Last updated {formatDate(post.data.updated)}</p>
+    )}
+  </article>
+
+  {post && (newer || older) && (
+    <nav class="wrap post-nav" aria-label="More posts" data-pagefind-ignore>
+      {older ? (
+        <a href={postUrl(older)} class="post-nav-link"><span class="mono dim">← Older</span><span>{older.data.title}</span></a>
+      ) : <span></span>}
+      {newer && (
+        <a href={postUrl(newer)} class="post-nav-link next"><span class="mono dim">Newer →</span><span>{newer.data.title}</span></a>
+      )}
+    </nav>
+  )}
+
+  {related.length > 0 && (
+    <section class="wrap" data-pagefind-ignore>
+      <h2 class="section-label mono">Recent {entry.data.title} posts</h2>
+      <PostList posts={related} showExcerpt={false} />
+    </section>
+  )}
+</Base>
+
+
+<script>
+  // Code blocks: a language label and a Copy button (styles in global.css, .code-tools)
+  // One polite live region announces "Code copied" to screen readers
+  const live = Object.assign(document.createElement('p'), { className: 'sr-only' });
+  live.setAttribute('aria-live', 'polite');
+  document.body.append(live);
+
+  for (const pre of document.querySelectorAll<HTMLPreElement>('.prose pre')) {
+    const wrap = document.createElement('div');
+    wrap.className = 'code-block';
+    pre.before(wrap);
+    wrap.append(pre);
+
+    const tools = document.createElement('div');
+    tools.className = 'code-tools';
+    const lang = pre.dataset.language;
+    if (lang && lang !== 'plaintext' && lang !== 'text') tools.append(Object.assign(document.createElement('span'), { textContent: lang }));
+    const button = Object.assign(document.createElement('button'), { type: 'button', textContent: 'Copy' });
+    button.setAttribute('aria-label', 'Copy code');
+    button.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(pre.innerText.replace(/\n$/, ''));
+        button.textContent = 'Copied';
+        live.textContent = 'Code copied';
+      } catch {
+        button.textContent = 'Press ⌘C';
+        getSelection()?.selectAllChildren(pre);
+      }
+      setTimeout(() => (button.textContent = 'Copy'), 1500);
+    });
+    tools.append(button);
+    wrap.append(tools);
+  }
+</script>

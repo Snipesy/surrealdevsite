@@ -1,0 +1,10 @@
+---
+import Home from '../components/Home.astro';
+import { getPosts } from '../lib/posts';
+import { SITE } from '../site';
+
+const all = await getPosts();
+const last = Math.max(1, Math.ceil(all.length / SITE.postsPerPage));
+---
+
+<Home posts={all.slice(0, SITE.postsPerPage)} current={1} last={last} />

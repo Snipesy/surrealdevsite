@@ -1,0 +1,28 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="Search" noindex>
+  <section class="wrap page-head">
+    <p class="kicker mono">search</p>
+    <h1>Search the site</h1>
+  </section>
+  <section class="wrap">
+    <div id="search"></div>
+    <noscript><p class="dim">Search needs JavaScript. Try the <a href="/archive/">archive</a> instead.</p></noscript>
+  </section>
+  <link href="/pagefind/pagefind-ui.css" rel="stylesheet" />
+  <script is:inline src="/pagefind/pagefind-ui.js"></script>
+  <script is:inline>
+    window.addEventListener('DOMContentLoaded', () => {
+      if (!window.PagefindUI) {
+        document.getElementById('search').innerHTML =
+          '<p class="dim">The search index is built by <code>npm run build</code>; it isn’t available in <code>npm run dev</code>.</p>';
+        return;
+      }
+      const ui = new PagefindUI({ element: '#search', showSubResults: true, showImages: false, resetStyles: false });
+      const q = new URLSearchParams(location.search).get('q');
+      if (q) ui.triggerSearch(q);
+    });
+  </script>
+</Base>

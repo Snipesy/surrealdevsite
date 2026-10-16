@@ -1,0 +1,44 @@
+---
+import Base from '../layouts/Base.astro';
+import PostList from './PostList.astro';
+import Pagination from './Pagination.astro';
+import { SITE, SOCIAL } from '../site';
+import type { Post } from '../lib/posts';
+import { categories, categoryUrl } from '../lib/posts';
+
+interface Props {
+  posts: Post[];
+  current: number;
+  last: number;
+}
+const { posts, current, last } = Astro.props;
+---
+
+<Base
+  title={current > 1 ? `Page ${current}` : undefined}
+  description={current > 1 ? `Older posts on ${SITE.title}, page ${current}.` : undefined}
+  jsonLd={current === 1 ? {
+    '@type': 'WebSite',
+    name: SITE.title,
+    url: Astro.site!.href,
+    description: SITE.description,
+    author: { '@type': 'Person', name: SITE.author, url: new URL('/about/', Astro.site).href, sameAs: SOCIAL.map((s) => s.href) },
+  } : undefined}
+>
+  {current === 1 && (
+    <section class="hero wrap">
+      <p class="kicker mono">// hi, i'm jessie (snipesy)</p>
+      <h1>I reverse engineer cars, phones, and everything in between.</h1>
+      <p class="lede"><a href="/about/">More about me</a></p>
+      <div class="cats">
+        {categories.map((c) => <a class="tag" href={categoryUrl(c.slug)}>{c.name}</a>)}
+      </div>
+    </section>
+  )}
+
+  <section class="wrap">
+    {current === 1 ? <h2 class="section-label mono">Latest</h2> : <h1 class="section-label mono">Posts · page {current}</h1>}
+    <PostList posts={posts} />
+    <Pagination current={current} last={last} />
+  </section>
+</Base>

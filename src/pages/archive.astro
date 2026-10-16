@@ -1,0 +1,38 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE } from '../site';
+import { getPosts, postUrl, formatDate, monthKey, categories, categoryUrl } from '../lib/posts';
+
+const posts = await getPosts();
+const byYear = new Map<number, typeof posts>();
+for (const p of posts) {
+  const y = p.data.date.getUTCFullYear();
+  byYear.set(y, [...(byYear.get(y) ?? []), p]);
+}
+const usedCats = categories.filter((c) => posts.some((p) => p.data.categories.includes(c.slug)));
+---
+
+<Base title="Archive" description={`Every post on ${SITE.title}, by year.`}>
+  <section class="wrap page-head">
+    <p class="kicker mono">archive</p>
+    <h1>Every post</h1>
+    <div class="cats">
+      {usedCats.map((c) => <a class="tag" href={categoryUrl(c.slug)}>{c.name}</a>)}
+    </div>
+  </section>
+  <section class="wrap">
+    {[...byYear].map(([year, list]) => (
+      <div class="year-block">
+        <h2 class="year mono">{year}</h2>
+        <ul class="compact-list">
+          {list.map((p) => (
+            <li>
+              <a class="mono dim" href={`/${monthKey(p.data.date)}/`}>{formatDate(p.data.date, 'short').replace(/, \d{4}$/, '')}</a>
+              <a href={postUrl(p)}>{p.data.title}</a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ))}
+  </section>
+</Base>

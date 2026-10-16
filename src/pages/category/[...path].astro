@@ -1,0 +1,28 @@
+---
+// /category/malware/, /category/software/gretio/ ...
+import Base from '../../layouts/Base.astro';
+import { SITE } from '../../site';
+import PostList from '../../components/PostList.astro';
+import { getPosts, categories } from '../../lib/posts';
+
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  return categories
+    .map((cat) => ({ cat, posts: posts.filter((p) => p.data.categories.includes(cat.slug)) }))
+    .filter(({ posts }) => posts.length > 0)
+    .map(({ cat, posts }) => ({ params: { path: cat.path }, props: { cat, posts } }));
+}
+
+const { cat, posts } = Astro.props;
+---
+
+<Base title={`${cat.name} posts`} description={`Every ${cat.name} post on ${SITE.title}, newest first.`}>
+  <section class="wrap page-head">
+    <p class="kicker mono">category</p>
+    <h1>{cat.name}</h1>
+    <p class="dim mono">{posts.length} {posts.length === 1 ? 'post' : 'posts'}</p>
+  </section>
+  <section class="wrap">
+    <PostList posts={posts} />
+  </section>
+</Base>

@@ -1,0 +1,31 @@
+---
+// Monthly archives at /2026/08/, like WordPress.
+import Base from '../../layouts/Base.astro';
+import PostList from '../../components/PostList.astro';
+import { getPosts, monthKey, monthLabel } from '../../lib/posts';
+
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  const groups = new Map<string, typeof posts>();
+  for (const p of posts) {
+    const k = monthKey(p.data.date);
+    groups.set(k, [...(groups.get(k) ?? []), p]);
+  }
+  return [...groups].map(([key, posts]) => {
+    const [year, month] = key.split('/');
+    return { params: { year, month }, props: { key, posts } };
+  });
+}
+
+const { key, posts } = Astro.props;
+---
+
+<Base title={monthLabel(key)} noindex>
+  <section class="wrap page-head">
+    <p class="kicker mono">archive</p>
+    <h1>{monthLabel(key)}</h1>
+  </section>
+  <section class="wrap">
+    <PostList posts={posts} />
+  </section>
+</Base>

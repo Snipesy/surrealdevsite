@@ -1,0 +1,123 @@
+---
+import '@fontsource-variable/inter';
+import '@fontsource-variable/jetbrains-mono';
+import '../styles/global.css';
+import { SITE, NAV, SOCIAL } from '../site';
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  type?: 'website' | 'article';
+  published?: Date;
+  modified?: Date;
+  noindex?: boolean;
+  /** schema.org structured data for search engines */
+  jsonLd?: Record<string, unknown>;
+}
+
+const { title, description: fullDescription = SITE.description, image, type = 'website', published, modified, noindex, jsonLd } = Astro.props;
+// Search results show ~155-160 characters; cut at a word so it doesn't end mid-word
+const description =
+  fullDescription.length > 160 ? fullDescription.slice(0, 157).replace(/[\s,.;:–-]+\S*$/, '') + '...' : fullDescription;
+const fullTitle = title ? `${title} – ${SITE.title}` : `${SITE.title} – ${SITE.tagline}`;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+// Pages without their own cover share the logo card (public/og.png)
+const ogImage = new URL(image ?? '/og.png', Astro.site).href;
+const path = Astro.url.pathname;
+const isActive = (href: string) =>
+  href === '/' ? path === '/' || path.startsWith('/page/') : path.startsWith(href);
+
+const year = new Date().getUTCFullYear();
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.png" type="image/png" />
+    <link rel="alternate" type="application/rss+xml" title={SITE.title} href="/rss.xml" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    {noindex && <meta name="robots" content="noindex" />}
+    <meta property="og:site_name" content={SITE.title} />
+    <meta property="og:title" content={title ?? SITE.title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content={type} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    {published && <meta property="article:published_time" content={published.toISOString()} />}
+    {modified && <meta property="article:modified_time" content={modified.toISOString()} />}
+    {jsonLd && <script type="application/ld+json" set:html={JSON.stringify({ '@context': 'https://schema.org', ...jsonLd }).replace(/</g, '\\u003c')} />}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#0c0e0d" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f6f5f1" media="(prefers-color-scheme: light)" />
+    <script is:inline>
+      (() => {
+        let t;
+        try { t = localStorage.getItem('theme'); } catch {}
+        if (t !== 'light' && t !== 'dark')
+          t = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+  </head>
+  <body>
+    <a class="skip" href="#content">Skip to content</a>
+    <header class="site-header">
+      <div class="wrap header-inner">
+        <a class="brand" href="/" aria-label={`${SITE.title} home`}>
+          <img class="logo logo-on-dark" src="/logo-white.svg" alt={SITE.title} height="40" />
+          <img class="logo logo-on-light" src="/logo-black.svg" alt={SITE.title} height="40" />
+        </a>
+        <nav class="nav" aria-label="Main">
+          {NAV.map((n) => (
+            <a href={n.href} class={n.href === '/' ? 'nav-home' : undefined} aria-current={isActive(n.href) ? 'page' : undefined}>{n.label}</a>
+          ))}
+          <a href="/search/" class="icon-link" aria-label="Search" aria-current={path.startsWith('/search') ? 'page' : undefined}>
+            <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+          </a>
+          <button class="icon-link theme-toggle" type="button" aria-label="Dark theme" aria-pressed="true">
+            <svg class="i-sun" aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+            <svg class="i-moon" aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path></svg>
+          </button>
+        </nav>
+      </div>
+    </header>
+
+    <main id="content">
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap footer-inner">
+        <div>
+          <p class="mono dim">© {year} {SITE.company}</p>
+          <p class="footer-links mono">
+            <a href="/archive/">Archive</a>
+            <a href="/rss.xml">RSS</a>
+            <a href="/privacy-policy/">Privacy</a>
+          </p>
+        </div>
+        <p class="footer-links mono">
+          {SOCIAL.map((s) => <a href={s.href} rel="me noopener">{s.label}</a>)}
+        </p>
+      </div>
+    </footer>
+
+    <script is:inline>
+      const toggle = document.querySelector('.theme-toggle');
+      const syncToggle = () => toggle?.setAttribute('aria-pressed', String(document.documentElement.dataset.theme === 'dark'));
+      syncToggle();
+      toggle?.addEventListener('click', () => {
+        const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+        document.documentElement.dataset.theme = next;
+        syncToggle();
+        try { localStorage.setItem('theme', next); } catch {}
+      });
+    </script>
+  </body>
+</html>

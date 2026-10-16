@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://surrealdev.com/sitemap-index.xml

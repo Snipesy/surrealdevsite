@@ -1,0 +1,22 @@
+---
+// /page/2/, /page/3/ ... (same URLs WordPress used)
+import Home from '../../components/Home.astro';
+import { getPosts } from '../../lib/posts';
+import { SITE } from '../../site';
+
+export async function getStaticPaths() {
+  const all = await getPosts();
+  const last = Math.ceil(all.length / SITE.postsPerPage);
+  return Array.from({ length: Math.max(0, last - 1) }, (_, i) => {
+    const page = i + 2;
+    return {
+      params: { page: String(page) },
+      props: { posts: all.slice((page - 1) * SITE.postsPerPage, page * SITE.postsPerPage), current: page, last },
+    };
+  });
+}
+
+const { posts, current, last } = Astro.props;
+---
+
+<Home posts={posts} current={current} last={last} />

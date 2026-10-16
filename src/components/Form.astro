@@ -1,0 +1,110 @@
+---
+// A page's `form:` frontmatter (see src/content.config.ts), posted to functions/api/form.js.
+import type { CollectionEntry } from 'astro:content';
+
+type FormDef = NonNullable<CollectionEntry<'pages'>['data']['form']>;
+interface Props {
+  id: string; // page slug; tells the handler which form this is
+  form: FormDef;
+}
+
+const { id, form } = Astro.props;
+
+// Without a real site key the always-pass test key gets baked in, and every submission
+// then fails against the production secret. Cloudflare Pages builds set CF_PAGES=1.
+const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
+if (!siteKey && process.env.CF_PAGES) {
+  throw new Error('PUBLIC_TURNSTILE_SITE_KEY is not set for this Cloudflare Pages build; the forms would not work. See README: "Forms".');
+}
+const fid = (name: string) => `f-${id}-${name}`;
+---
+
+<form
+  class="site-form"
+  method="post"
+  action="/api/form"
+  data-form={id}
+  data-pagefind-ignore
+>
+  <input type="hidden" name="_form" value={id} />
+  <label class="form-hp" aria-hidden="true">Leave this empty <input type="text" name="_website" tabindex="-1" autocomplete="off" /></label>
+
+  {form.fields.map((f) => f.type === 'checkbox' ? (
+    <div class="field field-check">
+      {f.help && <p class="field-help">{f.help}</p>}
+      <label><input type="checkbox" name={f.name} value="yes" required={f.required} /> {f.label}</label>
+    </div>
+  ) : (
+    <div class="field">
+      <label for={fid(f.name)}>{f.label}</label>
+      {f.type === 'textarea' ? (
+        <textarea id={fid(f.name)} name={f.name} rows="8" maxlength="5000" required={f.required} />
+      ) : f.type === 'select' ? (
+        <select id={fid(f.name)} name={f.name} required={f.required}>
+          {f.required && <option value="" disabled selected>Choose...</option>}
+          {f.options?.map((o) => <option>{o}</option>)}
+        </select>
+      ) : (
+        <input
+          id={fid(f.name)}
+          type={f.type}
+          name={f.name}
+          maxlength="400"
+          autocomplete={f.type === 'email' ? 'email' : f.name === 'name' ? 'name' : undefined}
+          required={f.required}
+        />
+      )}
+      {f.help && <p class="field-help">{f.help}</p>}
+    </div>
+  ))}
+
+  {form.note && <p class="form-note">{form.note}</p>}
+  <div class="cf-turnstile"></div>
+  <button type="submit">{form.submit}</button>
+  <p class="form-status" role="status" aria-live="polite"></p>
+</form>
+
+<script>
+  // Cloudflare's always-pass test key unless PUBLIC_TURNSTILE_SITE_KEY is set at build time
+  const SITE_KEY = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || '1x00000000000000000000AA';
+
+  for (const form of document.querySelectorAll<HTMLFormElement>('form.site-form')) {
+    const widget = form.querySelector<HTMLElement>('.cf-turnstile')!;
+    widget.dataset.sitekey = SITE_KEY;
+    widget.dataset.theme = document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      submit(form);
+    });
+  }
+
+  const api = document.createElement('script');
+  api.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
+  api.async = true;
+  document.head.append(api);
+
+  async function submit(form: HTMLFormElement) {
+    const status = form.querySelector<HTMLElement>('.form-status')!;
+    const button = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+    const show = (state: string, text: string) => {
+      status.dataset.state = state;
+      status.textContent = text;
+    };
+    const data = new FormData(form);
+    if (!data.get('cf-turnstile-response')) return show('error', 'Please wait for the spam check to finish.');
+
+    button.disabled = true;
+    show('', 'Sending...');
+    try {
+      const res = await fetch(form.action, { method: 'POST', body: data, headers: { Accept: 'application/json' } });
+      const json = await res.json().catch(() => ({ ok: false, message: 'Something went wrong. Please try again.' }));
+      show(json.ok ? 'ok' : 'error', json.message);
+      if (json.ok) form.reset();
+    } catch {
+      show('error', 'Couldn’t reach the server. Check your connection and try again.');
+    } finally {
+      button.disabled = false;
+      (window as any).turnstile?.reset(form.querySelector('.cf-turnstile'));
+    }
+  }
+</script>
