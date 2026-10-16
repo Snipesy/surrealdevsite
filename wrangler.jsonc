@@ -20,7 +20,7 @@
     "FORM_FROM": "contact@surrealdev.com",
     "FORM_TO": "contact@surrealdev.com"
   },
-  "kv_namespaces": [{ "binding": "FORM_LIMITS", "id": "FORM_LIMITS_NAMESPACE_ID" }],
+  "kv_namespaces": [{ "binding": "FORM_LIMITS", "id": "02a5fee1245a4946b538dd2a3b9fca83" }],
   // Live domains. Until these are added, deploys go to surrealdev.<account>.workers.dev only.
   // "routes": [
   //   { "pattern": "surrealdev.com", "custom_domain": true },
@@ -44,7 +44,7 @@
         "FORM_TO": "contact@surrealdev.com",
         "NOINDEX": "1"
       },
-      "kv_namespaces": [{ "binding": "FORM_LIMITS", "id": "FORM_LIMITS_NAMESPACE_ID" }]
+      "kv_namespaces": [{ "binding": "FORM_LIMITS", "id": "02a5fee1245a4946b538dd2a3b9fca83" }]
       // "routes": [{ "pattern": "staging.surrealdev.com", "custom_domain": true }]
     }
   }
