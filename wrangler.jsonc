@@ -21,11 +21,10 @@
     "FORM_TO": "contact@surrealdev.com"
   },
   "kv_namespaces": [{ "binding": "FORM_LIMITS", "id": "02a5fee1245a4946b538dd2a3b9fca83" }],
-  // Live domains. Until these are added, deploys go to surrealdev.<account>.workers.dev only.
-  // "routes": [
-  //   { "pattern": "surrealdev.com", "custom_domain": true },
-  //   { "pattern": "www.surrealdev.com", "custom_domain": true }
-  // ],
+  "routes": [
+    { "pattern": "surrealdev.com", "custom_domain": true },
+    { "pattern": "www.surrealdev.com", "custom_domain": true }
+  ],
 
   "env": {
     // The staging branch deploys here (scripts/deploy-branch.mjs): a separate Worker, noindexed

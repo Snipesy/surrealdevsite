@@ -87,7 +87,7 @@ Local test: `cp .dev.vars.example .dev.vars`, then `npm run preview`. `FORM_DRY_
 5. **DKIM:** Microsoft Defender → Email authentication settings → DKIM → surrealdev.com → add its two CNAMEs in Cloudflare (DNS only) → enable.
 6. **KV:** create a namespace and put its ID in both `FORM_LIMITS` entries in `wrangler.jsonc`.
 7. **Worker:** Workers & Pages → Create → Import a repository → this repo. Build command `npm run build`, deploy command `npm run deploy`, non-production branch deploy command `npm run deploy:branch`. Add the variables above to `surrealdev`, and after the first staging deploy, to `surrealdev-staging`.
-8. **Domains:** uncomment `routes` in `wrangler.jsonc` (production, and staging under `env.staging`) and push. Until then it's only on `workers.dev`.
+8. **Domains:** production routes are in `wrangler.jsonc`; for staging, uncomment `routes` under `env.staging`.
 9. **WAF:** rate-limiting rule on `/api/form`, e.g. 3 requests per 10 seconds per IP.
 
 ## Deploy
