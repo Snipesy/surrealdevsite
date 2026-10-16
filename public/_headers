@@ -1,5 +1,0 @@
-# Cloudflare Pages headers: https://developers.cloudflare.com/pages/configuration/headers/
-
-# The staging copy of the site must never show up in search results
-https://staging.surrealdev.com/*
-  X-Robots-Tag: noindex, nofollow

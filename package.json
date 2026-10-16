@@ -8,7 +8,9 @@
     "check": "node scripts/check-content.mjs",
     "prebuild": "node scripts/check-content.mjs",
     "build": "astro build && pagefind --site dist",
-    "preview": "astro preview",
+    "preview": "npm run build && wrangler dev",
+    "deploy": "wrangler deploy",
+    "deploy:branch": "node scripts/deploy-branch.mjs",
     "premedia": "node scripts/thumbs.mjs",
     "media": "node scripts/media.mjs",
     "prepare": "git rev-parse --git-dir >/dev/null 2>&1 && git config core.hooksPath .githooks || true"
@@ -25,11 +27,16 @@
     "exif-reader": "^2.0.3",
     "pagefind": "^1.5.2",
     "sharp": "^0.35.5",
+    "wrangler": "^4.151.0",
     "yaml": "^2.9.1"
   },
   "private": true,
   "type": "module",
   "engines": {
     "node": ">=22.22.0"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true,
+    "workerd@1.20261012.1": true
   }
 }

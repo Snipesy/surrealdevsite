@@ -1,0 +1,51 @@
+// Cloudflare Worker config. Secrets (TURNSTILE_SECRET_KEY, MS_CLIENT_SECRET) and the Microsoft IDs
+// are set in the dashboard (Worker → Settings → Variables and Secrets), not here.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "surrealdev",
+  "main": "worker/index.js",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    "html_handling": "auto-trailing-slash",
+    // Everything else is served straight from dist/ without running the Worker
+    "run_worker_first": ["/api/*"]
+  },
+  "observability": { "enabled": true },
+  // Don't delete variables set in the dashboard on deploy
+  "keep_vars": true,
+  "vars": {
+    "FORM_FROM": "contact@surrealdev.com",
+    "FORM_TO": "contact@surrealdev.com"
+  },
+  "kv_namespaces": [{ "binding": "FORM_LIMITS", "id": "FORM_LIMITS_NAMESPACE_ID" }],
+  // Live domains. Until these are added, deploys go to surrealdev.<account>.workers.dev only.
+  // "routes": [
+  //   { "pattern": "surrealdev.com", "custom_domain": true },
+  //   { "pattern": "www.surrealdev.com", "custom_domain": true }
+  // ],
+
+  "env": {
+    // The staging branch deploys here (scripts/deploy-branch.mjs): a separate Worker, noindexed
+    "staging": {
+      "name": "surrealdev-staging",
+      "assets": {
+        "directory": "./dist",
+        "binding": "ASSETS",
+        "not_found_handling": "404-page",
+        "html_handling": "auto-trailing-slash",
+        "run_worker_first": true
+      },
+      "keep_vars": true,
+      "vars": {
+        "FORM_FROM": "contact@surrealdev.com",
+        "FORM_TO": "contact@surrealdev.com",
+        "NOINDEX": "1"
+      },
+      "kv_namespaces": [{ "binding": "FORM_LIMITS", "id": "FORM_LIMITS_NAMESPACE_ID" }]
+      // "routes": [{ "pattern": "staging.surrealdev.com", "custom_domain": true }]
+    }
+  }
+}

@@ -1,4 +1,4 @@
-// The forms in page frontmatter, as data for functions/api/form.js, so the handler accepts only
+// The forms in page frontmatter, as data for worker/form.js, so the handler accepts only
 // real forms and fields and uses these labels rather than anything the browser sends.
 import { getCollection } from 'astro:content';
 

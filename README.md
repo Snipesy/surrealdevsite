@@ -1,11 +1,12 @@
 # surrealdev.com
 
-Source for [surrealdev.com](https://surrealdev.com). Static [Astro](https://astro.build) site on Cloudflare Pages; media in R2; one Pages Function for forms.
+Source for [surrealdev.com](https://surrealdev.com). Static [Astro](https://astro.build) site on a Cloudflare Worker (static assets + one `/api/form` route); media in R2.
 
 ```
 npm install
 npm run dev      # http://localhost:4321
 npm run build    # dist/
+npm run preview  # build + wrangler dev, with the form (http://localhost:8787)
 npm run check    # content + accessibility checks
 npm run media    # media/ → R2 (dry run; add -- --yes to upload)
 ```
@@ -20,8 +21,8 @@ npm run media    # media/ → R2 (dry run; add -- --yes to upload)
 | Site name, nav, links | `src/site.ts` |
 | Styles | `src/styles/global.css` |
 | Media | `media/` locally (not in git), `media.surrealdev.com` in production |
-| Form handler | `functions/api/form.js` |
-| Redirects, headers | `public/_redirects`, `public/_headers` |
+| Worker, form handler | `worker/index.js`, `worker/form.js`, config in `wrangler.jsonc` |
+| Redirects | `public/_redirects` |
 
 ## Posts
 
@@ -55,18 +56,14 @@ Add `form:` to a page's frontmatter (see `src/content/pages/contact.md`). Field 
 
 The function checks Turnstile, accepts only fields listed in `/form-manifest.json`, emails the submission to `FORM_TO` from `FORM_FROM` via Microsoft Graph, and sends the visitor a fixed confirmation (no text from the form): at most one per address per day, `CONFIRM_DAILY_CAP` (default 50) per day overall, never to the site's own domain.
 
-Pages variables (Production and Preview):
+Worker variables (Settings → Variables and Secrets, on both `surrealdev` and `surrealdev-staging`). `FORM_FROM`, `FORM_TO` and the `FORM_LIMITS` KV binding are in `wrangler.jsonc`.
 
 | Name | |
 | --- | --- |
-| `NODE_VERSION` | not needed (`.node-version` pins 24) |
-| `PUBLIC_TURNSTILE_SITE_KEY` | Turnstile site key (build fails without it) |
+| `PUBLIC_TURNSTILE_SITE_KEY` | Turnstile site key, as a **build** variable (Settings → Build); the build fails without it |
 | `TURNSTILE_SECRET_KEY` | Turnstile secret (secret) |
 | `MS_TENANT_ID`, `MS_CLIENT_ID` | Entra app registration |
 | `MS_CLIENT_SECRET` | its client secret (secret) |
-| `FORM_FROM` | sending mailbox, e.g. `contact@surrealdev.com` |
-| `FORM_TO` | recipients, comma-separated |
-| `FORM_LIMITS` | KV namespace binding (Settings → Bindings); no confirmations are sent without it |
 
 The Entra app gets no API permissions in Entra. It's scoped to the one mailbox in Exchange Online:
 
@@ -79,7 +76,7 @@ New-ManagementRoleAssignment -App <client-id> -Role "Application Mail.Send" -Cus
 
 `FORM_FROM` must be the mailbox's user principal name. The role assignment can take up to two hours to apply. Don't also grant Mail.Send in Entra; it would apply to every mailbox.
 
-Local test: `cp .dev.vars.example .dev.vars`, `npm run build`, `npx wrangler pages dev dist`. `FORM_DRY_RUN=1` prints instead of sending (localhost only).
+Local test: `cp .dev.vars.example .dev.vars`, then `npm run preview`. `FORM_DRY_RUN=1` prints instead of sending (localhost only).
 
 ## Setup (once)
 
@@ -88,14 +85,14 @@ Local test: `cp .dev.vars.example .dev.vars`, `npm run build`, `npx wrangler pag
 3. **Entra:** App registrations → New registration (single tenant) → client secret (expires; max 24 months). Object ID for `New-ServicePrincipal` is under Enterprise applications, not App registrations.
 4. **Exchange:** the PowerShell above (`Install-Module ExchangeOnlineManagement` first; `docker run -it --rm mcr.microsoft.com/powershell` works). Check with `Test-ServicePrincipalAuthorization -Identity <client-id> -Resource contact@surrealdev.com` → InScope True.
 5. **DKIM:** Microsoft Defender → Email authentication settings → DKIM → surrealdev.com → add its two CNAMEs in Cloudflare (DNS only) → enable.
-6. **KV:** create a namespace, bind it as `FORM_LIMITS` in Pages (Production and Preview).
-7. **Pages:** connect the repo, set the variables above for Production and Preview.
-8. **DNS:** `staging` CNAME → `staging.<project>.pages.dev`; add `surrealdev.com` and `www` as Pages custom domains.
+6. **KV:** create a namespace and put its ID in both `FORM_LIMITS` entries in `wrangler.jsonc`.
+7. **Worker:** Workers & Pages → Create → Import a repository → this repo. Build command `npm run build`, deploy command `npm run deploy`, non-production branch deploy command `npm run deploy:branch`. Add the variables above to `surrealdev`, and after the first staging deploy, to `surrealdev-staging`.
+8. **Domains:** uncomment `routes` in `wrangler.jsonc` (production, and staging under `env.staging`) and push. Until then it's only on `workers.dev`.
 9. **WAF:** rate-limiting rule on `/api/form`, e.g. 3 requests per 10 seconds per IP.
 
 ## Deploy
 
-Cloudflare Pages, build `npm run build`, output `dist`. `main` → surrealdev.com, `staging` → staging.surrealdev.com (noindexed; form emails tagged with the host).
+Cloudflare Workers Builds: `main` → the `surrealdev` Worker (surrealdev.com), `staging` → `surrealdev-staging` (staging.surrealdev.com, noindexed; form emails tagged with the host), other branches → preview versions. Node is pinned by `.node-version`.
 
 ## Pre-commit
 

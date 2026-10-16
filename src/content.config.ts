@@ -32,7 +32,7 @@ const pages = defineCollection({
     excerpt: z.string().optional(),
     // Hide from search/sitemap-style listings if needed
     hidden: z.boolean().default(false),
-    // Optional form shown after the page text; submissions go to functions/api/form.js
+    // Optional form shown after the page text; submissions go to worker/form.js
     form: z
       .object({
         submit: z.string().default('Submit'),

@@ -1,5 +1,5 @@
 ---
-// A page's `form:` frontmatter (see src/content.config.ts), posted to functions/api/form.js.
+// A page's `form:` frontmatter (see src/content.config.ts), posted to worker/form.js.
 import type { CollectionEntry } from 'astro:content';
 
 type FormDef = NonNullable<CollectionEntry<'pages'>['data']['form']>;
@@ -11,10 +11,10 @@ interface Props {
 const { id, form } = Astro.props;
 
 // Without a real site key the always-pass test key gets baked in, and every submission
-// then fails against the production secret. Cloudflare Pages builds set CF_PAGES=1.
+// then fails against the production secret. Cloudflare builds set WORKERS_CI=1 (Workers) or CF_PAGES=1 (Pages).
 const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
-if (!siteKey && process.env.CF_PAGES) {
-  throw new Error('PUBLIC_TURNSTILE_SITE_KEY is not set for this Cloudflare Pages build; the forms would not work. See README: "Forms".');
+if (!siteKey && (process.env.WORKERS_CI || process.env.CF_PAGES)) {
+  throw new Error('PUBLIC_TURNSTILE_SITE_KEY is not set for this Cloudflare build; the forms would not work. See README: "Forms".');
 }
 const fid = (name: string) => `f-${id}-${name}`;
 ---

@@ -1,4 +1,4 @@
-# Copy to .dev.vars for `npx wrangler pages dev dist`. These are Cloudflare's always-pass Turnstile test keys.
+# Copy to .dev.vars for `npm run preview` (wrangler dev). These are Cloudflare's always-pass Turnstile test keys.
 TURNSTILE_SECRET_KEY=1x0000000000000000000000000000000AA
 FORM_FROM=contact@surrealdev.com
 FORM_TO=you@example.com

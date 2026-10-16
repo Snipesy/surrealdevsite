@@ -1,4 +1,4 @@
-# Cloudflare Pages redirects: https://developers.cloudflare.com/pages/configuration/redirects/
+# Redirects for Workers static assets: https://developers.cloudflare.com/workers/static-assets/redirects/
 # Post and page URLs are unchanged from WordPress (/<slug>/); these cover everything else.
 
 # Feeds

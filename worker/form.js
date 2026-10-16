@@ -1,9 +1,9 @@
-// Cloudflare Pages Function: POST /api/form
+// POST /api/form, called from worker/index.js
 //
 // Receives the forms defined in page frontmatter (src/components/Form.astro),
 // checks Turnstile, and emails the submission through Microsoft 365 (Graph API sendMail).
 //
-// Settings (Pages → Settings → Variables and Secrets; locally in .dev.vars):
+// Settings (wrangler.jsonc, or the Worker's Settings → Variables and Secrets; locally in .dev.vars):
 //   TURNSTILE_SECRET_KEY  Turnstile widget secret
 //   MS_TENANT_ID          Microsoft 365 tenant (directory) ID
 //   MS_CLIENT_ID          ID of the app registration allowed to send mail (README: "Forms")
@@ -26,7 +26,7 @@ const isEmail = (v) => v.length <= 254 && v.indexOf('@') <= 64 && EMAIL_RE.test(
 
 let manifest; // form id → { title, fields }, from /form-manifest.json (src/pages/form-manifest.json.ts)
 
-export async function onRequestPost({ request, env }) {
+export async function handleForm(request, env) {
   const local = LOCAL_HOSTS.includes(new URL(request.url).hostname);
   const dryRun = env.FORM_DRY_RUN === '1';
 
