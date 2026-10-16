@@ -76,13 +76,16 @@ export async function onRequestPost({ request, env }) {
   const subject = fields.find((f) => f.name === 'subject')?.value;
   const site = (env.SITE_URL || 'https://surrealdev.com').replace(/\/$/, '');
   const pageUrl = `${site}/${form}/`;
+  // Submissions from anywhere but the live site (e.g. staging.surrealdev.com) say so in the subject
+  const host = new URL(request.url).hostname;
+  const where = host === new URL(site).hostname ? '' : ` (${host})`;
   const notice = 'Sent through the website form. Everything below was typed by the visitor and is unverified.';
 
   const email = {
     from: env.FORM_FROM,
     to: env.FORM_TO.split(',').map((s) => s.trim()),
     reply_to: replyTo,
-    subject: `[surrealdev.com form: ${form}] ${subject || `New submission${replyTo ? ` from ${replyTo}` : ''}`}`.replace(/[\r\n]+/g, ' ').slice(0, 200),
+    subject: `[surrealdev.com form: ${form}]${where} ${subject || `New submission${replyTo ? ` from ${replyTo}` : ''}`}`.replace(/[\r\n]+/g, ' ').slice(0, 200),
     text: [`Form: ${pageUrl}`, notice, '', ...fields.map((f) => `${f.label}:\n${f.value || '—'}\n`)].join('\n').trim(),
     html:
       `<p style="color:#666">Form: <a href="${esc(pageUrl)}">${esc(pageUrl)}</a><br>${esc(notice)}</p>` +

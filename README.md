@@ -72,6 +72,19 @@ The site is built for Cloudflare Pages: `functions/` (the form handler) and `pub
 
 Upload new media with `npm run media -- --yes` before pushing posts that use it.
 
+### Staging
+
+The `staging` branch deploys to `staging.surrealdev.com`, a full copy of the site with working forms, for testing before `main`.
+
+- Try changes: `git push origin <your-branch>:staging` (or merge into `staging`), then check `staging.surrealdev.com`.
+- `public/_headers` keeps it out of search engines; form emails from it say `(staging.surrealdev.com)` in the subject.
+
+One-time setup in Cloudflare:
+1. DNS for surrealdev.com: add a CNAME `staging` → `staging.<pages-project>.pages.dev` (proxied).
+2. Pages project → Settings → Variables and Secrets: set the form variables for the **Preview** environment too.
+3. Turnstile widget → Hostnames: add `staging.surrealdev.com`.
+4. Optional: Zero Trust → Access → protect `staging.surrealdev.com` so only you can open it (free for up to 50 users).
+
 ## 5. Forms
 
 A page gets a form by adding `form:` to its frontmatter (see `contact.md`; fields are checked by `src/content.config.ts`):
