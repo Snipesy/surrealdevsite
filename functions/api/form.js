@@ -10,6 +10,8 @@
 //   MS_CLIENT_SECRET      that app's client secret
 //   FORM_FROM             mailbox that sends the email, e.g. contact@surrealdev.com
 //   FORM_TO               where submissions go (comma-separated for several)
+//   FORM_LIMITS           KV namespace binding that limits confirmation emails; without it none are sent
+//   CONFIRM_DAILY_CAP     optional, default 50: most confirmations per day across all forms
 //   SITE_URL              optional, default https://surrealdev.com (used for links in the email)
 //   FORM_DRY_RUN=1        local testing only: print the email instead of sending it
 
@@ -19,9 +21,10 @@ const LOCAL_HOSTS = ['localhost', '127.0.0.1', '[::1]'];
 
 // Cloudflare's Turnstile test secrets (1x..., 2x..., 3x...). Real secrets start with 0x.
 const isTestSecret = (s) => /^[1-3]x0{20,}/.test(s);
-const EMAIL_RE = /^[A-Za-z0-9.!#$%&*+/=?^_`{|}~-]+@[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?)+$/;
+const EMAIL_RE = /^[A-Za-z0-9!#$%&*+/=?^_`{|}~-]+(?:\.[A-Za-z0-9!#$%&*+/=?^_`{|}~-]+)*@(?:[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?\.)+(?:[A-Za-z]{2,63}|xn--[A-Za-z0-9-]{2,59})$/;
+const isEmail = (v) => v.length <= 254 && v.indexOf('@') <= 64 && EMAIL_RE.test(v);
 
-let manifest; // form id → fields, from /form-manifest.json (src/pages/form-manifest.json.ts)
+let manifest; // form id → { title, fields }, from /form-manifest.json (src/pages/form-manifest.json.ts)
 
 export async function onRequestPost({ request, env }) {
   const local = LOCAL_HOSTS.includes(new URL(request.url).hostname);
@@ -54,8 +57,9 @@ export async function onRequestPost({ request, env }) {
   manifest ??= await env.ASSETS.fetch(new URL('/form-manifest.json', request.url)).then((r) => (r.ok ? r.json() : null)).catch(() => null);
   if (!manifest) return misconfigured("couldn't load /form-manifest.json");
   const form = String(data.get('_form') || '');
-  const defs = Object.hasOwn(manifest, form) ? manifest[form] : null;
-  if (!defs) return reply(400, 'Unknown form.');
+  const def_ = Object.hasOwn(manifest, form) ? manifest[form] : null;
+  if (!def_) return reply(400, 'Unknown form.');
+  const defs = def_.fields;
 
   const allowed = new Set(['_form', '_website', 'cf-turnstile-response', ...defs.map((f) => f.name)]);
   for (const [name, value] of data.entries()) {
@@ -69,7 +73,7 @@ export async function onRequestPost({ request, env }) {
     if (values.length > 1) return reply(400, 'Unexpected field.');
     const value = String(values[0] ?? '').slice(0, MAX_FIELD_CHARS).trim();
     if (def.required && !value) return reply(400, `Please fill in “${def.label}”.`);
-    if (value && def.type === 'email' && !EMAIL_RE.test(value)) return reply(400, `“${def.label}” isn’t a valid email address.`);
+    if (value && def.type === 'email' && !isEmail(value)) return reply(400, `“${def.label}” isn’t a valid email address.`);
     if (value && def.type === 'select' && !def.options?.includes(value)) return reply(400, `Please choose an option for “${def.label}”.`);
     if (value && def.type === 'checkbox' && value !== 'yes') return reply(400, 'Unexpected field.');
     fields.push({ name: def.name, label: def.label, value: def.type === 'checkbox' ? (value ? 'Yes' : 'No') : value });
@@ -97,7 +101,8 @@ export async function onRequestPost({ request, env }) {
 
   if (dryRun) {
     console.log('FORM_DRY_RUN, not sending:', JSON.stringify(email, null, 2));
-    return reply(200, 'Thanks! Your message was sent.');
+    if (replyTo) console.log('FORM_DRY_RUN, confirmation:', JSON.stringify(confirmation(def_.title, pageUrl, env.FORM_FROM, replyTo), null, 2));
+    return reply(200, 'Thanks! Your message was sent. A confirmation is on its way to your inbox.');
   }
 
   try {
@@ -106,13 +111,78 @@ export async function onRequestPost({ request, env }) {
     console.error(`Sending failed: ${e.message}`);
     return reply(502, 'Sending failed on our side. Please try again later or email us.');
   }
-  return reply(200, 'Thanks! Your message was sent.');
+
+  // Confirmation to the visitor. It goes to whatever address was typed in, so it carries nothing
+  // the visitor wrote: nobody can use the form to send their own text from surrealdev.com.
+  let confirmed = false;
+  if (replyTo && (await mayConfirm(env, replyTo, local).catch((e) => (console.error(`Confirmation limit check failed: ${e.message}`), false)))) {
+    try {
+      await sendMail(env, confirmation(def_.title, pageUrl, env.FORM_FROM, replyTo));
+      confirmed = true;
+    } catch (e) {
+      console.error(`Confirmation failed: ${e.message}`); // the submission itself went through
+    }
+  }
+  return reply(200, confirmed ? 'Thanks! Your message was sent. A confirmation is on its way to your inbox.' : 'Thanks! Your message was sent.');
+}
+
+/**
+ * Confirmations go to whatever address was typed in, so they're limited: never to our own domain,
+ * one per address per day, and CONFIRM_DAILY_CAP per day in total. Over a limit the submission still
+ * reaches us; only the confirmation is skipped.
+ */
+async function mayConfirm(env, address, local) {
+  const [local_, domain] = address.toLowerCase().split('@');
+  // Never mail our own organisation: its domain, its subdomains, or any Microsoft tenant domain
+  const own = env.FORM_FROM.split('@').pop().toLowerCase();
+  if (domain === own || domain.endsWith('.' + own) || domain.endsWith('.onmicrosoft.com')) return false;
+  const kv = env.FORM_LIMITS;
+  if (!kv) {
+    if (!local) console.error('Form handler: no FORM_LIMITS KV binding, so no confirmation sent');
+    return local; // local tests without KV still confirm
+  }
+  // One per mailbox, not per spelling: drop +tags, and dots for Gmail (it ignores them)
+  let user = local_.split('+')[0];
+  if (domain === 'gmail.com' || domain === 'googlemail.com') user = user.replaceAll('.', '');
+  const key = `${user}@${domain === 'googlemail.com' ? 'gmail.com' : domain}`;
+  const hash = [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(key)))]
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+  const day = new Date().toISOString().slice(0, 10);
+  const cap = Number(env.CONFIRM_DAILY_CAP) || 50;
+  const [seen, count] = await Promise.all([kv.get(`to:${hash}`), kv.get(`day:${day}`)]);
+  if (seen) return false;
+  if (Number(count) >= cap) {
+    console.error(`Confirmation daily cap (${cap}) reached`);
+    return false;
+  }
+  await Promise.all([
+    kv.put(`to:${hash}`, '1', { expirationTtl: 86400 }),
+    kv.put(`day:${day}`, String(Number(count) + 1), { expirationTtl: 2 * 86400 }),
+  ]);
+  return true;
+}
+
+/** The fixed confirmation email; only the form's title and page come from us, nothing from the visitor. */
+function confirmation(title, pageUrl, from, to) {
+  const lines = [
+    `We received your "${title}" submission on surrealdev.com, and we'll get back to you at this address.`,
+    `If you didn't submit this form, you can ignore this email.`,
+  ];
+  return {
+    from,
+    to: [to],
+    subject: `We received your message - surrealdev.com`,
+    html:
+      lines.map((l) => `<p>${esc(l)}</p>`).join('') +
+      `<p style="color:#666">Surreal Development<br><a href="${esc(pageUrl)}">${esc(pageUrl)}</a></p>`,
+  };
 }
 
 let token; // { value, expires } for Microsoft Graph, reused while the isolate lives
 
 /** Send through Microsoft 365 as FORM_FROM, using the app's client credentials. */
-async function sendMail(env, email) {
+async function sendMail(env, email, retry = true) {
   if (!token || token.expires < Date.now() + 60_000) {
     const res = await fetch(`https://login.microsoftonline.com/${encodeURIComponent(env.MS_TENANT_ID)}/oauth2/v2.0/token`, {
       method: 'POST',
@@ -122,9 +192,10 @@ async function sendMail(env, email) {
         scope: 'https://graph.microsoft.com/.default',
         grant_type: 'client_credentials',
       }),
+      signal: AbortSignal.timeout(10_000),
     });
     const out = await res.json().catch(() => ({}));
-    if (!res.ok || !out.access_token) throw new Error(`token ${res.status} ${out.error ?? ''} ${(out.error_description ?? '').split('\n')[0]}`);
+    if (!res.ok || !out.access_token) throw new Error(`token ${res.status} ${out.error ?? ''}`);
     token = { value: out.access_token, expires: Date.now() + out.expires_in * 1000 };
   }
   const address = (a) => ({ emailAddress: { address: a } });
@@ -140,11 +211,18 @@ async function sendMail(env, email) {
       },
       saveToSentItems: true,
     }),
+    signal: AbortSignal.timeout(10_000),
   });
-  if (res.status !== 202) {
+  if (res.status === 202) return;
+  // Expired token: get a new one. Throttled: wait as asked (up to 5 s). Either way, try once more.
+  // 500/504 may mean Graph accepted it anyway, so only these are safe to resend
+  if (retry && [401, 429, 502, 503].includes(res.status)) {
     if (res.status === 401) token = null;
-    throw new Error(`sendMail ${res.status} ${(await res.text()).slice(0, 300)}`);
+    const wait = Math.min(Number(res.headers.get('Retry-After')) || 1, 5);
+    if (res.status !== 401) await new Promise((r) => setTimeout(r, wait * 1000));
+    return sendMail(env, email, false);
   }
+  throw new Error(`sendMail ${res.status}`);
 }
 
 /** The request body, or null once it passes `max` bytes (Content-Length can be missing or wrong). */

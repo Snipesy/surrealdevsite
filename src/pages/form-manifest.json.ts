@@ -9,7 +9,10 @@ export async function GET() {
       .filter((p) => p.data.form)
       .map((p) => [
         p.id,
-        p.data.form!.fields.map(({ name, label, type, required, options }) => ({ name, label, type, required, options })),
+        {
+          title: p.data.title,
+          fields: p.data.form!.fields.map(({ name, label, type, required, options }) => ({ name, label, type, required, options })),
+        },
       ])
   );
   return new Response(JSON.stringify(forms), { headers: { 'Content-Type': 'application/json' } });

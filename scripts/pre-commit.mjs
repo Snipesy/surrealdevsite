@@ -25,6 +25,7 @@ const ALLOWED = [/(^|\/)\.env\.example$/, /(^|\/)\.dev\.vars\.example$/];
 const SECRETS = [
   [/\b0x4[A-Za-z0-9_-]{30,}\b/, 'Turnstile secret key'],
   [/-----BEGIN [A-Z ]*PRIVATE KEY-----/, 'private key'],
+  [/\b[\w.~-]{3}\dQ~[\w.~-]{31,34}\b/, 'Microsoft Entra client secret'],
   [/\b(?:AKIA|ASIA)[A-Z0-9]{16}\b/, 'AWS access key'],
   // A secret variable with a value (empty values and Cloudflare's public 1x000... test keys are fine)
   [/^[ \t]*(?:R2_SECRET_ACCESS_KEY|R2_ACCESS_KEY_ID|MS_CLIENT_SECRET|TURNSTILE_SECRET_KEY|CLOUDFLARE_API_TOKEN)[ \t]*=[ \t]*(?![1-3]x0{20,})[^\s#]{8,}/m, 'filled-in secret variable'],
