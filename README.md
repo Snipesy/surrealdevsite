@@ -99,22 +99,35 @@ form:
 
 Types: `text`, `email`, `textarea`, `select` (with `options`), `checkbox`. File uploads aren't supported; ask for documents by email instead. A field named `email` becomes the reply-to; `subject` becomes the email subject.
 
-`src/components/Form.astro` renders it with a Cloudflare Turnstile check. On submit it posts to `functions/api/form.js`, which verifies Turnstile, rejects bots that fill a hidden field, accepts only the forms and fields listed in `/form-manifest.json` (built from the frontmatter by `src/pages/form-manifest.json.ts`), and emails the submission via [Resend](https://resend.com).
+`src/components/Form.astro` renders it with a Cloudflare Turnstile check. On submit it posts to `functions/api/form.js`, which verifies Turnstile, rejects bots that fill a hidden field, accepts only the forms and fields listed in `/form-manifest.json` (built from the frontmatter by `src/pages/form-manifest.json.ts`), and emails the submission from your Microsoft 365 mailbox (Microsoft Graph `sendMail`).
 
 **Setup (once):**
 
 1. Cloudflare dashboard → Turnstile → add a widget for `surrealdev.com`. Copy the keys.
-2. Resend → verify the `surrealdev.com` domain and create an API key.
-3. Pages project → Settings → Variables and Secrets:
+2. Microsoft Entra admin center (entra.microsoft.com) → App registrations → New registration, e.g. "surrealdev.com forms", single tenant. Note the **Application (client) ID** and **Directory (tenant) ID**. Under Certificates & secrets, add a client secret and copy its **Value** (it expires; 24 months at most, so set a reminder).
+3. Let that app send only as the forms mailbox, using Exchange Online RBAC for Applications. Don't add Mail.Send under the app's API permissions: that would let it send as every mailbox. In PowerShell (`pwsh`, or Cloud Shell in the Microsoft 365 admin center):
+   ```powershell
+   Install-Module ExchangeOnlineManagement   # once
+   Connect-ExchangeOnline
+   # ObjectId: Entra → Enterprise applications → your app → Object ID (not the app registration's)
+   New-ServicePrincipal -AppId <client-id> -ObjectId <enterprise-app-object-id> -DisplayName "surrealdev.com forms"
+   New-ManagementScope -Name "Website forms mailbox" -RecipientRestrictionFilter "PrimarySmtpAddress -eq 'contact@surrealdev.com'"
+   New-ManagementRoleAssignment -App <client-id> -Role "Application Mail.Send" -CustomResourceScope "Website forms mailbox"
+   Test-ServicePrincipalAuthorization -Identity <client-id> -Resource contact@surrealdev.com   # InScope should be True
+   ```
+4. Pages project → Settings → Variables and Secrets (Production and Preview):
    - `PUBLIC_TURNSTILE_SITE_KEY`: site key (used at build time)
    - `TURNSTILE_SECRET_KEY`: secret key (encrypt)
-   - `RESEND_API_KEY`: API key (encrypt)
+   - `MS_TENANT_ID`, `MS_CLIENT_ID`: from step 2
+   - `MS_CLIENT_SECRET`: from step 2 (encrypt)
+   - `FORM_FROM`: the mailbox from step 3, e.g. `contact@surrealdev.com`
    - `FORM_TO`: where submissions go (comma-separate several)
-   - `FORM_FROM`: e.g. `surrealdev.com <forms@surrealdev.com>`
+
+Submissions arrive from `FORM_FROM` with Reply-To set to the visitor, and a copy is kept in that mailbox's Sent Items.
 
 A Cloudflare Pages build fails if `PUBLIC_TURNSTILE_SITE_KEY` isn't set. Off localhost the function also refuses Turnstile test secrets and `FORM_DRY_RUN`.
 
-**Rate limit (recommended):** Cloudflare dashboard → surrealdev.com → Security → WAF → Rate limiting rules → create a rule: URI Path equals `/api/form`, 5 requests per 1 minute per IP, action Block. Turnstile stops bots, but a rate limit keeps someone with cheap captcha solves from using up the Resend quota.
+**Rate limit (recommended):** Cloudflare dashboard → surrealdev.com → Security → WAF → Rate limiting rules → create a rule: URI Path equals `/api/form`, 5 requests per 1 minute per IP, action Block. Turnstile stops bots, but a rate limit keeps someone with cheap captcha solves from flooding your inbox.
 
 
 **Testing locally:** `npm run dev` doesn't run functions. Use `cp .dev.vars.example .dev.vars`, `npm run build`, then `npx wrangler pages dev dist`. With `FORM_DRY_RUN=1` the email is printed to the terminal instead of sent.
@@ -145,7 +158,7 @@ Contributors don't need any of this to run the site. Since `media/` is git-ignor
 `npm install` sets git to use `.githooks/`, whose pre-commit hook (`scripts/pre-commit.mjs`) checks the staged files and blocks the commit if any of these turn up:
 
 - `.env`, `.dev.vars`, private keys, or anything in `media/`
-- something that looks like a Resend key, Turnstile secret, AWS/R2 key or private key, or a filled-in secret variable
+- something that looks like a Turnstile secret, AWS/R2 key or private key, or a filled-in secret variable
 - a photo or video with location data (the same check as `npm run media`)
 - a file over 2 MB (put it in the bucket)
 - a post or page with broken frontmatter, or an accessibility problem: an image without alt text, a `#` heading in the body (the title is the page's only h1), a skipped heading level, an image inside a heading, a link without text, or an `<iframe>` without a title

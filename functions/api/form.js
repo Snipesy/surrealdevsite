@@ -1,13 +1,15 @@
 // Cloudflare Pages Function: POST /api/form
 //
 // Receives the forms defined in page frontmatter (src/components/Form.astro),
-// checks Turnstile, and emails the submission through Resend.
+// checks Turnstile, and emails the submission through Microsoft 365 (Graph API sendMail).
 //
 // Settings (Pages → Settings → Variables and Secrets; locally in .dev.vars):
 //   TURNSTILE_SECRET_KEY  Turnstile widget secret
-//   RESEND_API_KEY        Resend API key
-//   FORM_TO               where submissions go, e.g. you@surrealdev.com
-//   FORM_FROM             verified Resend sender, e.g. "surrealdev.com <forms@surrealdev.com>"
+//   MS_TENANT_ID          Microsoft 365 tenant (directory) ID
+//   MS_CLIENT_ID          ID of the app registration allowed to send mail (README: "Forms")
+//   MS_CLIENT_SECRET      that app's client secret
+//   FORM_FROM             mailbox that sends the email, e.g. contact@surrealdev.com
+//   FORM_TO               where submissions go (comma-separated for several)
 //   SITE_URL              optional, default https://surrealdev.com (used for links in the email)
 //   FORM_DRY_RUN=1        local testing only: print the email instead of sending it
 
@@ -25,7 +27,8 @@ export async function onRequestPost({ request, env }) {
   const local = LOCAL_HOSTS.includes(new URL(request.url).hostname);
   const dryRun = env.FORM_DRY_RUN === '1';
 
-  const missing = ['TURNSTILE_SECRET_KEY', 'FORM_TO', 'FORM_FROM', ...(dryRun ? [] : ['RESEND_API_KEY'])].filter((k) => !env[k]);
+  const mailKeys = ['MS_TENANT_ID', 'MS_CLIENT_ID', 'MS_CLIENT_SECRET'];
+  const missing = ['TURNSTILE_SECRET_KEY', 'FORM_TO', 'FORM_FROM', ...(dryRun ? [] : mailKeys)].filter((k) => !env[k]);
   if (missing.length) return misconfigured(`missing settings: ${missing.join(', ')}`);
   // Test keys and dry runs switch off protection or delivery; never allow them on the live site
   if (!local && isTestSecret(env.TURNSTILE_SECRET_KEY)) return misconfigured('TURNSTILE_SECRET_KEY is a Cloudflare test key');
@@ -83,8 +86,8 @@ export async function onRequestPost({ request, env }) {
 
   const email = {
     from: env.FORM_FROM,
-    to: env.FORM_TO.split(',').map((s) => s.trim()),
-    reply_to: replyTo,
+    to: env.FORM_TO.split(',').map((s) => s.trim()).filter(Boolean),
+    replyTo,
     subject: `[surrealdev.com form: ${form}]${where} ${subject || `New submission${replyTo ? ` from ${replyTo}` : ''}`}`.replace(/[\r\n]+/g, ' ').slice(0, 200),
     text: [`Form: ${pageUrl}`, notice, '', ...fields.map((f) => `${f.label}:\n${f.value || '—'}\n`)].join('\n').trim(),
     html:
@@ -97,16 +100,51 @@ export async function onRequestPost({ request, env }) {
     return reply(200, 'Thanks! Your message was sent.');
   }
 
-  const res = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify(email),
-  });
-  if (!res.ok) {
-    console.error(`Resend ${res.status}: ${(await res.text()).slice(0, 500)}`);
+  try {
+    await sendMail(env, email);
+  } catch (e) {
+    console.error(`Sending failed: ${e.message}`);
     return reply(502, 'Sending failed on our side. Please try again later or email us.');
   }
   return reply(200, 'Thanks! Your message was sent.');
+}
+
+let token; // { value, expires } for Microsoft Graph, reused while the isolate lives
+
+/** Send through Microsoft 365 as FORM_FROM, using the app's client credentials. */
+async function sendMail(env, email) {
+  if (!token || token.expires < Date.now() + 60_000) {
+    const res = await fetch(`https://login.microsoftonline.com/${encodeURIComponent(env.MS_TENANT_ID)}/oauth2/v2.0/token`, {
+      method: 'POST',
+      body: new URLSearchParams({
+        client_id: env.MS_CLIENT_ID,
+        client_secret: env.MS_CLIENT_SECRET,
+        scope: 'https://graph.microsoft.com/.default',
+        grant_type: 'client_credentials',
+      }),
+    });
+    const out = await res.json().catch(() => ({}));
+    if (!res.ok || !out.access_token) throw new Error(`token ${res.status} ${out.error ?? ''} ${(out.error_description ?? '').split('\n')[0]}`);
+    token = { value: out.access_token, expires: Date.now() + out.expires_in * 1000 };
+  }
+  const address = (a) => ({ emailAddress: { address: a } });
+  const res = await fetch(`https://graph.microsoft.com/v1.0/users/${encodeURIComponent(email.from)}/sendMail`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token.value}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      message: {
+        subject: email.subject,
+        body: { contentType: 'HTML', content: email.html },
+        toRecipients: email.to.map(address),
+        replyTo: email.replyTo ? [address(email.replyTo)] : [],
+      },
+      saveToSentItems: true,
+    }),
+  });
+  if (res.status !== 202) {
+    if (res.status === 401) token = null;
+    throw new Error(`sendMail ${res.status} ${(await res.text()).slice(0, 300)}`);
+  }
 }
 
 /** The request body, or null once it passes `max` bytes (Content-Length can be missing or wrong). */

@@ -1,6 +1,9 @@
 # Copy to .dev.vars for `npx wrangler pages dev dist`. These are Cloudflare's always-pass Turnstile test keys.
 TURNSTILE_SECRET_KEY=1x0000000000000000000000000000000AA
+FORM_FROM=contact@surrealdev.com
 FORM_TO=you@example.com
-FORM_FROM=surrealdev.com <forms@surrealdev.com>
+# Print the email instead of sending it. To send for real through Microsoft 365, remove this and fill in:
 FORM_DRY_RUN=1
-# RESEND_API_KEY=re_...
+# MS_TENANT_ID=
+# MS_CLIENT_ID=
+# MS_CLIENT_SECRET=

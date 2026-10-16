@@ -23,12 +23,11 @@ const ALLOWED = [/(^|\/)\.env\.example$/, /(^|\/)\.dev\.vars\.example$/];
 
 // Things that look like credentials in file contents
 const SECRETS = [
-  [/\bre_[A-Za-z0-9]{8,}_[A-Za-z0-9]{16,}\b/, 'Resend API key'],
   [/\b0x4[A-Za-z0-9_-]{30,}\b/, 'Turnstile secret key'],
   [/-----BEGIN [A-Z ]*PRIVATE KEY-----/, 'private key'],
   [/\b(?:AKIA|ASIA)[A-Z0-9]{16}\b/, 'AWS access key'],
   // A secret variable with a value (empty values and Cloudflare's public 1x000... test keys are fine)
-  [/^[ \t]*(?:R2_SECRET_ACCESS_KEY|R2_ACCESS_KEY_ID|RESEND_API_KEY|TURNSTILE_SECRET_KEY|CLOUDFLARE_API_TOKEN)[ \t]*=[ \t]*(?![1-3]x0{20,})[^\s#]{8,}/m, 'filled-in secret variable'],
+  [/^[ \t]*(?:R2_SECRET_ACCESS_KEY|R2_ACCESS_KEY_ID|MS_CLIENT_SECRET|TURNSTILE_SECRET_KEY|CLOUDFLARE_API_TOKEN)[ \t]*=[ \t]*(?![1-3]x0{20,})[^\s#]{8,}/m, 'filled-in secret variable'],
 ];
 
 const git = (...args) => execFileSync('git', args, { maxBuffer: 1 << 28 });
