@@ -59,7 +59,7 @@ Pages variables (Production and Preview):
 
 | Name | |
 | --- | --- |
-| `NODE_VERSION` | `22` |
+| `NODE_VERSION` | not needed (`.node-version` pins 24) |
 | `PUBLIC_TURNSTILE_SITE_KEY` | Turnstile site key (build fails without it) |
 | `TURNSTILE_SECRET_KEY` | Turnstile secret (secret) |
 | `MS_TENANT_ID`, `MS_CLIENT_ID` | Entra app registration |
