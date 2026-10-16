@@ -15,7 +15,7 @@ Thanks for using Surreal Developments Products. We need to clear a few things ab
 
 ### 2\. This Website (surrealdev.com)
 
-The website doesn't use accounts, analytics, or advertising. Like any website, our hosting and security providers process basic technical information such as your IP address to deliver pages and protect the site from abuse, and may use strictly necessary cookies to do so.
+The website doesn't use accounts or advertising. It uses privacy-friendly analytics to count visits and measure page speed (such as the pages viewed, the referring website, and your country, browser, and device type). These analytics don't use cookies, don't track you across websites or visits, and aren't used for advertising. Like any website, our hosting and security providers process basic technical information such as your IP address to deliver pages and protect the site from abuse, and may use strictly necessary cookies to do so.
 
 If you submit a form, what you send is delivered to Surreal Development by email and used only to respond to you or handle your request. We use a third-party service to check that submissions aren't from bots. Embedded content (such as videos) and links to other websites are covered by those websites' own privacy policies.
 
