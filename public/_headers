@@ -5,7 +5,7 @@
 # Fixed names: keep for a day so the logo doesn't blink on every page, refresh in the background after that.
 /logo-*.svg
   Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-/favicon.png
+/favicon.*
   Cache-Control: public, max-age=86400, stale-while-revalidate=604800
 /badges/*
   Cache-Control: public, max-age=86400, stale-while-revalidate=604800
