@@ -42,6 +42,17 @@ draft: true                    # optional
 
 Images go in `media/images/`, linked as `/images/...`. Upload them with `npm run media -- --yes` before pushing. Decorative images: `<img src="..." alt="" role="presentation">`.
 
+### Light and dark images
+
+For an image that needs a version per theme, add both, with `#light` or `#dark` on the end of the path. Each shows only in its theme; untagged images show in both.
+
+```md
+![Wiring diagram](/images/diagram.png#light)
+![Wiring diagram](/images/diagram-dark.png#dark)
+```
+
+Works in HTML too (`<img src="/logo-black.svg#light" ...>`). Not for `cover:`.
+
 ## Media
 
 `npm run build` rewrites `/images/...` and `/thumbs/...` to `https://media.surrealdev.com/...` (`MEDIA_URL` to override). `npm run dev` serves `media/`, falling back to the bucket.

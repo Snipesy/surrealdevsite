@@ -1,0 +1,11 @@
+# Astro's build output has content hashes in the file names, so it never changes in place.
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Fixed names: keep for a day so the logo doesn't blink on every page, refresh in the background after that.
+/logo-*.svg
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+/favicon.png
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+/badges/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800

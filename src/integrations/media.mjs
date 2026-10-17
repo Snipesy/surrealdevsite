@@ -32,7 +32,8 @@ const sizes = (() => {
 function sizeImages(html) {
   return html.replace(/<img\b[^>]*>/g, (tag) => {
     const src = tag.match(/\ssrc="([^"]+)"/)?.[1];
-    const key = src && MEDIA_PREFIXES.some((p) => src.startsWith(p)) ? decodeURI(src) : null;
+    // Sizes are keyed by path; drop a #light/#dark marker (see README: "Light and dark images")
+    const key = src && MEDIA_PREFIXES.some((p) => src.startsWith(p)) ? decodeURI(src.split('#')[0]) : null;
     if (!key || key.startsWith('/thumbs/')) return tag;
     let out = tag;
     const size = sizes[key];

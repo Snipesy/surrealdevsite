@@ -21,7 +21,8 @@ My main motto is if you are the smartest person in the room, you are probably in
 
 ## About Surreal Development LLC
 
-![Surreal Development logo](/images/a190376097d8.svg)
+<img src="/logo-black.svg#light" alt="Surreal Development logo" width="532" height="112">
+<img src="/logo-white.svg#dark" alt="Surreal Development logo" width="532" height="112">
 
 Surreal Development (AKA SurrealDev) is a limited liability company founded in 2016 in South Dakota and based in Seattle, Washington.
 
