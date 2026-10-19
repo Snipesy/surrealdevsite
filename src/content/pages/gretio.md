@@ -19,8 +19,6 @@ You can download Gretio for free on your mobile device's app store!
 
 [Gretio Common Terms & Glossary](/gretio-common-terms-glossary/)
 
-[Known Issues and Changelog](/gretio-known-issues-and-milestones/)
-
 ### Features
 
 -   Hundreds to thousands of data features (PIDs) from BCM, ECM, TCM, TCCM, and more
