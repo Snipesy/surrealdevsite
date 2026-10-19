@@ -28,6 +28,7 @@
 # Renamed or removed
 /research-privacy-notice/    /privacy-policy/     301
 /new_site_new_look/          /new-site-new-look/  301
+/developer-tools-for-obd2/   /gretio/             301
 
 # Images and thumbnails live in the media bucket (README: "Media")
 /images/*                    https://media.surrealdev.com/images/:splat   301
