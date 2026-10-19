@@ -28,9 +28,9 @@ You can download Gretio for free on your mobile device's app store!
 -   OEM DTC scanner
 -   OEM Software Information, part numbers, and CVN History
 -   \[Android only\] Multi Device mode for Multi-Function Displays (MFD) setups.
--   \[Android only\] Dashboard pages for graphical data.  
+-   Dashboard pages for graphical data.  
     ![Gretio Android dashboard with engine speed gauge, MIL status, and battery voltage and MAF graphs](/images/c8f87a142606.webp)![Gretio EPA Tests data view table listing PIDs with value, units, min, max, mean and module](/images/bba3343364af.webp)![Gretio Data Log graph of engine speed, MAF and ignition voltage over time](/images/313919aa0969.webp)
--   \[Android only\] Recording and data graphs
+-   Recording and data graphs
 
 ### Supported OBD2 Devices
 
