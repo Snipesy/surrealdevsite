@@ -74,7 +74,7 @@ Most power side channel analyses use unrealistic scenarios such as programming a
 
 My approach is to instead send a single SecOC frame (or more accurately... wait on a SecOC frame) and observe the result naturally. While this means traces are much slower, it requires 0 exploitation. You just trigger the AES-CMAC operation however you can, and on a vehicle component that is always going to be a CAN Frame.
 
-So, the scope triggers on the CAN EOF. The trace is then downloaded to a computer where it is stored for later processing.
+So, the scope triggers on the CAN SOF. The trace is then downloaded to a computer where it is stored for later processing.
 
 
 
