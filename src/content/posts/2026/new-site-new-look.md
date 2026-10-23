@@ -23,3 +23,5 @@ And it looks better. It uses [Astro](https://astro.build/)
 Anyway, its the same sites. Some things changed. And, to further my mission of transparency. It is now open source.
 
 https://github.com/Snipesy/surrealdevsite
+
+I also got insanely lucky. I did this like 3 days before the first [php2shell](https://www.wiz.io/blog/php2shell-php-rce)] exploitation.

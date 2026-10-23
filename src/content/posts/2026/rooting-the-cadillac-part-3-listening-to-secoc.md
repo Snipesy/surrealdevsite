@@ -1,6 +1,7 @@
 ---
 title: "Rooting the Cadillac Part 3: Infineon EMI Power Side Channels"
-date: 2026-10-23
+date: 2026-10-23T17:07:24.000Z
+updated: 2026-10-23T17:07:24.000Z
 categories: ["automotive-ramblings"]
 excerpt: "I tried to pull an AES-CMAC key out of a TC3xx HSM over the air. I didn't get it. Here's the setup, what did leak, and 207 GB of traces so you can try :)"
 cover: "/images/72527b61bb68.png"

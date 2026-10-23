@@ -1,7 +1,7 @@
 ---
 title: "Maybe you should decline OTAs?"
 date: 2026-07-30T21:36:04.000Z
-updated: 2026-08-19T08:22:31.000Z
+updated: 2026-10-23T17:07:24.000Z
 categories: ["automotive-ramblings"]
 excerpt: "featured image from BMW USA in car advertisements Let's talk about Why. If you have not read The ABCs of Global B yet I highly recommend starting there. Tuning modern vehicles is tricky as modules will only accept calibrations signed by GM. They usually won't even allow you to enter a programming..."
 cover: "/images/314ab89f46d3.jpeg"
@@ -18,6 +18,19 @@ There are random high effort attacks that have worked around this but each has t
 If your goal is long term right to repair and owning your own vehicle, then this article is worth a read. While obviously it focuses on GM this article actually applies to all OEMs in general.... Especially BMW.
 
 _Disclaimer: This article is not advice. Its goal is to inform vehicle owners in the name of transparency._
+
+## Another Disclaimer (October 23 2026)
+
+In light of the recent [GitLab](https://thehackernews.com/2026/10/critical-gitlab-flaw-cvss-100-could.html), [php2shell](https://www.wiz.io/blog/php2shell-php-rce), [eMudhra](https://emudhra.we-have-a-problem.com/), and [other exploits this week](https://x.com/calif_io/status/2111080240978223545), _you should probably accept OTAs_. Especially on your phone, laptop, or other internet connected devices.
+
+Even this website used to run on WordPress. I switched it to a static site roughly 2 days prior to the first known php exploitation, and completely revamped the security posture of surrealdev.com.
+
+The worst thing an attacker gets from compromising surrealdev.com is just an email address (user data is stored separately, and significantly more securely). But still. I should have done more to protect the infrastructure and I let it go unmaintained for far too long.
+
+... I got lucky...
+
+Having said that, I think what I discuss in this article is still worth very serious discussion. I.e. there is also a recent iOS Jailbreak and I am torn on if I will even update my phone (or maybe I'll buy a new one) as iOS security research is something I've been really wanting to get into lately.
+
 
 ## AI Breaks the Illusion of Security
 
