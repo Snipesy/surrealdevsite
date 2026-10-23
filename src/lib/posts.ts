@@ -17,7 +17,8 @@ export function categoryUrl(slug: string) {
 }
 
 export async function getPosts(): Promise<Post[]> {
-  const posts = await getCollection('posts', ({ data }) => !data.draft);
+  // Drafts show in `npm run dev` only, so they can be reviewed locally; builds leave them out
+  const posts = await getCollection('posts', ({ data }) => !data.draft || import.meta.env.DEV);
   return posts.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 }
 
