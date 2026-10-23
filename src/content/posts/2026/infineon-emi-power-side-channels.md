@@ -1,5 +1,5 @@
 ---
-title: "Rooting the Cadillac Part 3: Infineon EMI Power Side Channels"
+title: "Infineon EMI Power Side Channels"
 date: 2026-10-23T17:07:24.000Z
 updated: 2026-10-23T17:07:24.000Z
 categories: ["automotive-ramblings"]
