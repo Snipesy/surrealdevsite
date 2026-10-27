@@ -2,7 +2,7 @@
 title: "About"
 date: 2021-05-16T09:28:07.000Z
 updated: 2026-10-09T20:15:02.000Z
-excerpt: "About the Company Surreal Development (AKA SurrealDev) is a limited liability company founded in 2016 in South Dakota and based in Seattle, Washington. In 2019 Surreal Development released Gretio which quickly became our flagship product. Gretio is the only DIY accessible professional tool..."
+excerpt: "Learn about Snipesy and surreal dev"
 ---
 
 ## About Snipesy
