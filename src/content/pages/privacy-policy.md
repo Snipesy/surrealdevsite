@@ -61,7 +61,7 @@ You may collect data on behalf of another (such as vehicle VINs). In these cases
 
 If you have lost access to your data, use the appropriate account recovery procedures of Apple or Google before making a request to Surreal Development LLC. Surreal Development cannot manage access to third-party authentication services.
 
-For other data issues, requests for copies of information Surreal Development LLC has about your accounts, including GDPR and CCPA requests, can be submitted at .
+For other data issues, requests for copies of information Surreal Development LLC has about your accounts, including GDPR and CCPA requests, can be submitted at [https://surrealdev.com/gpdr_requests/](https://surrealdev.com/gpdr_requests/).
 
 ### 8. Children
 

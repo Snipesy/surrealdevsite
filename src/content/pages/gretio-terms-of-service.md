@@ -25,7 +25,7 @@ If you use Gretio as a guest, your account exists only on your device. A guest a
 
 ### 3. Your Privacy
 
-Your privacy is important to us. Gretio is subject to the Surreal Development LLC Privacy Policy, available at  and included within Gretio, which is incorporated herein by reference. By using the Service, you consent to our collection, use, and disclosure of information as described in the Privacy Policy.
+Your privacy is important to us. Gretio is subject to the Surreal Development LLC Privacy Policy, available at [https://surrealdev.com/privacy-policy/](https://surrealdev.com/privacy-policy/) and included within Gretio, which is incorporated herein by reference. By using the Service, you consent to our collection, use, and disclosure of information as described in the Privacy Policy.
 
 ### 4. Intellectual Property Rights
 
@@ -77,4 +77,4 @@ If you obtained Gretio from the Apple App Store, you acknowledge that these Term
 
 ### 14. Governing Law and Entire Agreement
 
-These Terms are governed by and construed in accordance with the laws of South Dakota, United States, without regard to conflict of law principles. Any disputes shall be subject to the exclusive jurisdiction of the state and federal courts located in Lincoln County, South Dakota. If any provision of these Terms is held to be unenforceable, such provision shall be reformed only to the extent necessary to make it enforceable, and the remaining provisions shall continue in full force and effect. These Terms, together with our Privacy Policy and any other agreements expressly incorporated by reference, constitute the entire agreement between you and Surreal Development LLC regarding the Service and supersede all prior agreements and understandings. Questions about these Terms may be sent through .
+These Terms are governed by and construed in accordance with the laws of South Dakota, United States, without regard to conflict of law principles. Any disputes shall be subject to the exclusive jurisdiction of the state and federal courts located in Lincoln County, South Dakota. If any provision of these Terms is held to be unenforceable, such provision shall be reformed only to the extent necessary to make it enforceable, and the remaining provisions shall continue in full force and effect. These Terms, together with our Privacy Policy and any other agreements expressly incorporated by reference, constitute the entire agreement between you and Surreal Development LLC regarding the Service and supersede all prior agreements and understandings. Questions about these Terms may be sent through [https://surrealdev.com/contact/](https://surrealdev.com/contact/).
