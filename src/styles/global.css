@@ -195,6 +195,10 @@ img, video, iframe { max-width: 100%; }
 /* ───────── Article ───────── */
 .article { padding-top: 3.5rem; }
 .article-head h1 { font-size: clamp(2rem, 5.5vw, 2.85rem); margin: 0.6rem 0 2rem; }
+/* Author line under the title; the h1 keeps its 2rem gap to the body when there is none (pages) */
+.article-head .byline { margin: -1.4rem 0 2rem; font-size: 0.9rem; }
+.article-head .byline a { color: var(--text); text-decoration: none; }
+.article-head .byline a:hover { text-decoration: underline; }
 .cover { display: block; max-width: 100%; max-height: 28rem; width: auto; margin: 0 auto 2rem; border-radius: var(--radius); }
 .updated { margin-top: 3rem; }
 
@@ -202,6 +206,8 @@ img, video, iframe { max-width: 100%; }
 .prose > :first-child { margin-top: 0; }
 .prose h1 { font-size: 1.85rem; margin: 3rem 0 1rem; }
 .prose h2 { font-size: 1.5rem; margin: 2.75rem 0 0.9rem; }
+/* Anchor jumps (e.g. /about/#about-snipesy) land below the sticky header */
+.prose :is(h2, h3, h4)[id] { scroll-margin-top: 4.5rem; }
 .prose h3 { font-size: 1.2rem; margin: 2.25rem 0 0.75rem; }
 .prose h4 { font-size: 1.02rem; margin: 2rem 0 0.6rem; }
 .prose p, .prose ul, .prose ol { margin: 0 0 1.25rem; }

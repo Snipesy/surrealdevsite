@@ -7,7 +7,7 @@
     "dev": "astro dev",
     "check": "node scripts/check-content.mjs",
     "prebuild": "node scripts/check-content.mjs",
-    "build": "astro build && pagefind --site dist",
+    "build": "astro build && pagefind --site dist && node scripts/headers.mjs",
     "preview": "npm run build && wrangler dev",
     "deploy": "wrangler deploy",
     "deploy:branch": "node scripts/deploy-branch.mjs",

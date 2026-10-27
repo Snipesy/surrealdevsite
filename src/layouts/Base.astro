@@ -11,12 +11,14 @@ interface Props {
   type?: 'website' | 'article';
   published?: Date;
   modified?: Date;
+  /** Post author, for the author meta tag */
+  author?: string;
   noindex?: boolean;
   /** schema.org structured data for search engines */
   jsonLd?: Record<string, unknown>;
 }
 
-const { title, description: fullDescription = SITE.description, image, type = 'website', published, modified, noindex, jsonLd } = Astro.props;
+const { title, description: fullDescription = SITE.description, image, type = 'website', published, modified, author, noindex, jsonLd } = Astro.props;
 // Search results show ~155-160 characters; cut at a word so it doesn't end mid-word
 const description =
   fullDescription.length > 160 ? fullDescription.slice(0, 157).replace(/[\s,.;:–-]+\S*$/, '') + '...' : fullDescription;
@@ -39,6 +41,7 @@ const year = new Date().getUTCFullYear();
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    {author && <meta name="author" content={author} />}
     <!-- sizes on the PNG makes browsers that support SVG favicons pick the SVG (it follows light/dark) -->
     <link rel="icon" href="/favicon.png" type="image/png" sizes="48x48" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />

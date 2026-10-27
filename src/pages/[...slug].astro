@@ -27,6 +27,8 @@ const post = kind === 'post' ? (entry as Post) : undefined;
 const decode = (s: string) => { try { return decodeURI(s); } catch { return s; } };
 const showCover = !!entry.data.cover && !decode(entry.body ?? '').includes(decode(entry.data.cover));
 const cats = post?.data.categories ?? [];
+// The site author links to their section on /about/; a guest author is a plain name
+const authorUrl = post?.data.author === SITE.author ? '/about/#about-snipesy' : undefined;
 
 // A page can list its related posts by having the same slug as a category (e.g. /gretio/).
 const related = kind === 'page' ? (await getPosts()).filter((p) => p.data.categories.includes(entry.id)).slice(0, 5) : [];
@@ -39,6 +41,7 @@ const related = kind === 'page' ? (await getPosts()).filter((p) => p.data.catego
   type={post ? 'article' : 'website'}
   published={post?.data.date}
   modified={post?.data.updated}
+  author={post?.data.author}
   jsonLd={post && {
     '@type': 'BlogPosting',
     headline: post.data.title,
@@ -48,7 +51,7 @@ const related = kind === 'page' ? (await getPosts()).filter((p) => p.data.catego
     url: new URL(postUrl(post), Astro.site).href,
     mainEntityOfPage: new URL(postUrl(post), Astro.site).href,
     image: new URL(post.data.cover ?? '/og.png', Astro.site).href,
-    author: { '@type': 'Person', name: SITE.author, url: new URL('/about/', Astro.site).href },
+    author: { '@type': 'Person', name: post.data.author, url: authorUrl && new URL(authorUrl, Astro.site).href },
     publisher: { '@type': 'Organization', name: SITE.company, logo: { '@type': 'ImageObject', url: new URL('/og.png', Astro.site).href } },
     keywords: cats.map((c: string) => categoryBySlug(c).name).join(', ') || undefined,
   }}
@@ -64,6 +67,9 @@ const related = kind === 'page' ? (await getPosts()).filter((p) => p.data.catego
         </p>
       )}
       <h1>{entry.data.title}</h1>
+      {post && (
+        <p class="byline mono dim">by {authorUrl ? <a href={authorUrl} rel="author">{post.data.author}</a> : post.data.author}</p>
+      )}
     </header>
     {showCover && <img class="cover" src={entry.data.cover} alt={post?.data.coverAlt ?? ''} />}
     <div class="prose">

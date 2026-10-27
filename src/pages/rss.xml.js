@@ -14,7 +14,7 @@ export async function GET(context) {
       description: excerptOf(p),
       link: `/${p.id}/`,
       categories: p.data.categories.map((c) => categoryBySlug(c).name),
-      author: SITE.author,
+      author: p.data.author,
     })),
   });
 }

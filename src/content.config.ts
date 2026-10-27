@@ -1,6 +1,7 @@
 import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
+import { SITE } from './site';
 
 const posts = defineCollection({
   // Posts live in year folders (posts/2026/my-post.md); the URL is the file name only: /my-post/
@@ -13,6 +14,8 @@ const posts = defineCollection({
     title: z.string(),
     date: z.coerce.date(),
     updated: z.coerce.date().optional(),
+    // Shown in the byline, feeds and structured data; defaults to the site author
+    author: z.string().default(SITE.author),
     // Category slugs; names and URLs live in src/data/categories.json
     categories: z.array(z.string()).default([]),
     excerpt: z.string().optional(),

@@ -23,6 +23,7 @@ npm run media    # media/ → R2 (dry run; add -- --yes to upload)
 | Media | `media/` locally (not in git), `media.surrealdev.com` in production |
 | Worker, form handler | `worker/index.js`, `worker/form.js`, config in `wrangler.jsonc` |
 | Redirects | `public/_redirects` |
+| Headers, security.txt | `public/_headers` (+ CSP from `scripts/headers.mjs` at build), `public/.well-known/security.txt` |
 
 ## Posts
 
@@ -31,6 +32,7 @@ npm run media    # media/ → R2 (dry run; add -- --yes to upload)
 title: "Post title"
 date: 2026-11-01
 categories: ["automotive-ramblings"]
+author: "Snipesy"             # optional, defaults to the site author in src/site.ts
 excerpt: "Optional."
 cover: "/images/cover.jpg"     # optional
 coverAlt: "..."                # optional, if the cover needs a description

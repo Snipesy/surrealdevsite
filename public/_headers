@@ -1,3 +1,16 @@
+# Security headers for every response served from dist/. The Content-Security-Policy is appended at
+# build time by scripts/headers.mjs, since it hashes the inline scripts. /api/* comes from the Worker.
+/*
+  Strict-Transport-Security: max-age=63072000; includeSubDomains
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), serial=()
+  Cross-Origin-Opener-Policy: same-origin
+
+/.well-known/security.txt
+  Content-Type: text/plain; charset=utf-8
+
 # Astro's build output has content hashes in the file names, so it never changes in place.
 /_astro/*
   Cache-Control: public, max-age=31536000, immutable

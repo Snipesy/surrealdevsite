@@ -9,6 +9,9 @@
 /category/:a/feed/           /rss.xml   301
 /category/:a/:b/feed/        /rss.xml   301
 
+# security.txt lives in .well-known (RFC 9116); the old location points there
+/security.txt                /.well-known/security.txt  301
+
 # WordPress-only pages
 /author/*                    /about/    301
 /:slug/amp/                  /:slug/    301
