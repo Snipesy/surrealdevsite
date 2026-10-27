@@ -11,6 +11,16 @@
 /.well-known/security.txt
   Content-Type: text/plain; charset=utf-8
 
+# Pagefind's search index uses its own extensions, which would otherwise go out without a Content-Type
+/pagefind/*.pf_meta
+  Content-Type: application/octet-stream
+/pagefind/*.pf_index
+  Content-Type: application/octet-stream
+/pagefind/*.pf_fragment
+  Content-Type: application/octet-stream
+/pagefind/*.pagefind
+  Content-Type: application/octet-stream
+
 # Astro's build output has content hashes in the file names, so it never changes in place.
 /_astro/*
   Cache-Control: public, max-age=31536000, immutable

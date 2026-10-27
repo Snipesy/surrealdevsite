@@ -1,3 +1,7 @@
+# Everything except the form endpoint, the search index and the search page itself
 User-agent: *
-Allow: /
+Disallow: /api/
+Disallow: /pagefind/
+Disallow: /search/
+
 Sitemap: https://surrealdev.com/sitemap-index.xml

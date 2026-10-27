@@ -1,6 +1,9 @@
 # Redirects for Workers static assets: https://developers.cloudflare.com/workers/static-assets/redirects/
 # Post and page URLs are unchanged from WordPress (/<slug>/); these cover everything else.
 
+# Sitemap: Astro writes sitemap-index.xml; scanners and some crawlers try the conventional name
+/sitemap.xml                 /sitemap-index.xml   301
+
 # Feeds
 /feed/                       /rss.xml   301
 /feed                        /rss.xml   301
