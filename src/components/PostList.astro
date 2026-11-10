@@ -24,11 +24,10 @@ const { posts, showExcerpt = true } = Astro.props;
           </p>
         )}
       </div>
-      {post.data.cover && (
-        <a class="post-thumb" href={postUrl(post)} tabindex="-1" aria-hidden="true">
-          <img src={thumbUrl(post.data.cover)} alt="" loading="lazy" decoding="async" />
-        </a>
-      )}
+      <a class="post-thumb" href={postUrl(post)} tabindex="-1" aria-hidden="true">
+        {/* Posts without a cover use the logo card, as link previews do */}
+        <img src={post.data.cover ? thumbUrl(post.data.cover) : '/og.png'} alt="" loading="lazy" decoding="async" />
+      </a>
     </li>
   ))}
 </ol>
