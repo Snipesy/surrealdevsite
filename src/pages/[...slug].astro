@@ -30,7 +30,7 @@ const cats = post?.data.categories ?? [];
 // The site author links to their section on /about/; a guest author is a plain name
 const authorUrl = post?.data.author === SITE.author ? '/about/#about-snipesy' : undefined;
 
-// A page can list its related posts by having the same slug as a category (e.g. /gretio/).
+// A page can list its related posts by having the same slug as a category (e.g. /malware/).
 const related = kind === 'page' ? (await getPosts()).filter((p) => p.data.categories.includes(entry.id)).slice(0, 5) : [];
 ---
 

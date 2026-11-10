@@ -7,7 +7,7 @@ excerpt: "Learn about Snipesy and surreal dev"
 
 ## About Snipesy
 
-AKA Jessie, I originally started a company once known as Surreal Performance (the original name of Surreal Development) which reverse engineered vehicles to do tuning (i.e. make them go faster). This eventually led me to get involved in diagnostic software with BiScan for GM, and the eventual Gretio project which I worked on while pursuing a B.S. in both Biochemistry and Computer Science (an interesting combination I know).
+AKA Jessie, I originally started a company once known as Surreal Performance (the original name of Surreal Development) which reverse engineered vehicles to do tuning (i.e. make them go faster). This eventually led me to get involved in diagnostic software with BiScan for GM, and the eventual Gretio project (now run by Gretio LLC at [gretioapp.com](https://gretioapp.com/)) which I worked on while pursuing a B.S. in both Biochemistry and Computer Science (an interesting combination I know).
 
 After graduation I spent some time consulting on various projects (apps, GRC, security auditing, plain old web dev, etc...) under the SurrealDev banner. I then spent 3 years leading the primary incident response team for Google Play Protect. While there I took down millions of malicious applications (millions is not a typo). Then I joined a startup, startup failed, and now I am back to working on security research :)
 
@@ -27,7 +27,7 @@ Surreal Development (AKA SurrealDev) was founded in 2017. I made the logo myself
 
 ## About Surrealdev.com
 
-surrealdev.com is many things. A personal blog for my research, news on Gretio, a portfolio. Personal research is strictly the work of the authors and does not represent the viewpoints of past/present/future employers, nor does it represent the viewpoints of Surreal Development LLC.
+surrealdev.com is many things. A personal blog for my research, a portfolio. Personal research is strictly the work of the authors and does not represent the viewpoints of past/present/future employers, nor does it represent the viewpoints of Surreal Development LLC.
 
 ## Before you throw AI at me
 

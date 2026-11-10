@@ -4,7 +4,7 @@ export const SITE = {
   shortTitle: 'SurrealDev',
   tagline: 'Reverse engineering notes by Snipesy',
   description:
-    'Snipesy’s blog: reverse engineering cars and phones, automotive security research, and the occasional Gretio update.',
+    'Snipesy’s blog: reverse engineering cars and phones, and automotive security research.',
   author: 'Snipesy',
   company: 'Surreal Development LLC',
   source: 'https://github.com/Snipesy/surrealdevsite',
@@ -13,7 +13,6 @@ export const SITE = {
 
 export const NAV = [
   { label: 'Blog', href: '/' },
-  { label: 'Gretio', href: '/gretio/' },
   { label: 'About', href: '/about/' },
   { label: 'Contact', href: '/contact/' },
 ];

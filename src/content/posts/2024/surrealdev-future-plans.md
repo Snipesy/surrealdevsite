@@ -2,7 +2,7 @@
 title: "SurrealDev Future Plans"
 date: 2024-03-18T04:17:31.000Z
 updated: 2026-08-14T20:51:23.000Z
-categories: ["gretio"]
+categories: ["automotive-ramblings"]
 excerpt: "Hello Surreal Dev Followers and Gretio users, This will be a more informal post than is usual. Due to my expertise in Android, Reverse Engineering, and software development in general I ended up taking a regular old job as a Reverse Engineer with Trellix (previously known as McAfee) in 2022. I now..."
 cover: "/images/506a7549590f.png"
 ---

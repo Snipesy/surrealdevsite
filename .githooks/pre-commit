@@ -1,2 +1,5 @@
 #!/bin/sh
+# GUI git clients don't inherit the shell's PATH, so add the usual Node locations (Homebrew, /usr/local)
+PATH="$PATH:/opt/homebrew/bin:/usr/local/bin"
+command -v node >/dev/null 2>&1 || { echo "pre-commit: node not found; install Node or add it to PATH" >&2; exit 1; }
 exec node scripts/pre-commit.mjs
